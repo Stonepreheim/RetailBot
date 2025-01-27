@@ -1,4 +1,5 @@
 import asyncio
+import os
 import random
 import time
 
@@ -17,7 +18,7 @@ class BestBuy:
     async def initialize(self):
         async with async_playwright() as p:
             self.browser = await p.chromium.launch_persistent_context(
-                user_data_dir="./data/browser/BestBuy",
+                user_data_dir=os.path.join(os.getcwd(), "./data/browser/BestBuy"),
                 channel="chrome",
                 headless=False,
                 no_viewport=True
@@ -30,6 +31,7 @@ class BestBuy:
             config = await self.file_util.read_json('data/user/config.json')
             if "BestBuy" not in config["logged_in"]:
                 await self.login()
+                await asyncio.sleep(3)
                 await self.browser.close()
                 config["logged_in"] += "BestBuy"
                 await self.file_util.write_json('data/user/config.json', config)
