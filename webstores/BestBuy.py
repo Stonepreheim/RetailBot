@@ -1,17 +1,18 @@
 import asyncio
-import json
+import random
+import time
 
-# patchright here!
+import pygame
 from patchright.async_api import async_playwright
 
+
 class BestBuy:
-    def __init__(self):
+    def __init__(self, file_util, target_url):
+        self.file_util = file_util
+        self.target_url = target_url
         self.browser = None
         self.page = None
-
-    def read_json(self, file_path):
-        with open(file_path, 'r') as file:
-            return json.load(file)
+        pygame.mixer.init()
 
     async def initialize(self):
         async with async_playwright() as p:
@@ -26,20 +27,18 @@ class BestBuy:
             # get login status from data/user/config.json
             # if missing login, login
             # else, start searchSite
-            config = self.read_json('data/user/config.json')
+            config = await self.file_util.read_json('data/user/config.json')
             if "BestBuy" not in config["logged_in"]:
                 await self.login()
-                #closing browser to force session save
                 await self.browser.close()
                 config["logged_in"] += "BestBuy"
-                with open('data/user/config.json', 'w') as file:
-                    json.dump(config, file)
+                await self.file_util.write_json('data/user/config.json', config)
                 await self.initialize()
             else:
                 await self.searchSite()
 
     async def login(self):
-        userData = self.read_json('data/user/user_info.json')
+        userData = await self.file_util.read_json('data/user/user_data.json')
         await self.page.goto('https://www.bestbuy.com/')
         await self.page.wait_for_selector("span[class$='line-clamp']")
         await self.page.click("span[class$='line-clamp']")
@@ -56,10 +55,27 @@ class BestBuy:
         await self.page.type("#fld-p1", userData["BestBuy_pass"])
         await self.page.click("button[class*='cia-form']")
 
-
-
     async def searchSite(self):
-            await self.page.goto('https://www.bestbuy.com/')
-            #await self.page.goto('https://www.google.com/')
-            await asyncio.sleep(30)
-            await self.browser.close()
+        while True:
+            await self.page.goto(self.target_url)
+            # await self.page.goto('https://www.google.com/')
+            # wait for page to load
+            await self.page.wait_for_selector("body", timeout=3000)
+            exists = await self.check_selector_exists(self.page, ".add-to-cart-button")
+            if exists:
+                print(time.strftime("%H:%M:%S") + " FOUND ITEM!!!" + self.target_url)
+                pygame.mixer.music.load("data/chimes/alert.mp3")
+                pygame.mixer.music.play()
+                await self.checkout()
+            else:
+                print(time.strftime("%H:%M:%S") + " Item not found: " + self.target_url)
+            await asyncio.sleep(random.randint(1, 3))
+        await self.browser.close()
+
+    async def checkout(self):
+        print("Checking out...")
+
+    @staticmethod
+    async def check_selector_exists(page, selector):
+        elements = await page.query_selector_all(selector)
+        return len(elements) > 0

@@ -1,7 +1,10 @@
 import asyncio
 import os
 import stat
+
 import webstores.BestBuy as bestBuy
+from FileUtil import FileUtil
+
 
 async def main():
     # Define the directory path
@@ -13,12 +16,13 @@ async def main():
     # Change the permissions of the directory
     os.chmod(user_data_dir, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
-    bb = bestBuy.BestBuy()
-
-    tasks = [
-        #run for each site here
-        bb.initialize()
-    ]
+    file_util = FileUtil()
+    tasks = []
+    config = await file_util.read_json('data/user/config.json')
+    for item in config["items"]:
+        if item["store"] == "BestBuy":
+            tasks.append(bestBuy.BestBuy(file_util, item["target_url"]).initialize())
+        # add future stores here
 
     # Run tasks concurrently
     await asyncio.gather(*tasks)

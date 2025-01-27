@@ -170,4 +170,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /.idea/
-/data/user/user_info.json
+/data/user/user_data.json
