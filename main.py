@@ -19,6 +19,9 @@ async def main():
     file_util = FileUtil()
     tasks = []
     config = await file_util.read_json('data/user/config.json')
+    if config["debug_mode"]:
+        # Warn user in red color that debug is enabled
+        print("\033[91m" + "Debug mode is enabled. Purchases WILL NOT be placed!!" + "\033[0m")
     for item in config["items"]:
         if item["store"] == "BestBuy":
             tasks.append(bestBuy.BestBuy(file_util, item["target_url"]).initialize())
