@@ -6,7 +6,7 @@ import time
 import pygame
 from patchright.async_api import async_playwright
 
-from webstore_util import check_selector_exists, wait_for_selectors, wait_for_user_action
+from webstore_util import check_selector_exists, wait_for_selectors, wait_for_user_action, wait_then_click
 
 
 class BestBuy:
@@ -36,7 +36,7 @@ class BestBuy:
                 await self.login()
                 await asyncio.sleep(3)
                 await self.browser.close()
-                self.config["logged_in"] += "BestBuy"
+                self.config["logged_in"] += ["BestBuy"]
                 await self.file_util.write_json('data/user/config.json', self.config)
                 await self.initialize()
             else:
@@ -65,16 +65,16 @@ class BestBuy:
             # await self.page.goto('https://www.google.com/')
             # wait for page to load
             await self.page.wait_for_selector("body", timeout=3000)
-            exists = await check_selector_exists(self.page, ".add-to-cart-button")
+            exists = await check_selector_exists(self.page, ".c-button.c-button-primary.c-button-sm.c-button-block.c-button-icon.c-button-icon-leading.add-to-cart-button")
             if exists:
-                print(time.strftime("%H:%M:%S") + " FOUND ITEM!!!" + self.target_url)
+                print(time.strftime("%H:%M:%S") + " FOUND ITEM!!! " + self.target_url)
                 pygame.mixer.music.load("data/chimes/alert.mp3")
                 pygame.mixer.music.play()
                 await self.checkout()
-            else:
-                print(time.strftime("%H:%M:%S") + " Item not found: " + self.target_url)
+            # else:
+            #     print(time.strftime("%H:%M:%S") + " Item not found: " + self.target_url)
             # random wait time to appear human
-            await asyncio.sleep(random.randint(1, 3))
+            await asyncio.sleep(random.randint(1, 4))
 
     async def checkout(self):
         print("Best Buy is checking out...")

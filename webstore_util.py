@@ -47,3 +47,8 @@ async def wait_for_user_action():
     await future
     keyboard.unhook(keyboard_hook)
     print("User action detected!")
+
+# simple function but would be repeated a lot without it
+async def wait_then_click(page, selector):
+    await page.wait_for_selector(selector)
+    await page.click(selector)

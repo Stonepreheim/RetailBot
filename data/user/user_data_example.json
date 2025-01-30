@@ -3,5 +3,6 @@
   "last_name": "Doe",
   "email": "useremail@gmail.com",
   "cvv": "123",
-  "BestBuy_pass": "best buy pass"
+  "BestBuy_pass": "best buy pass",
+  "Newegg_pass": "newegg pass"
 }

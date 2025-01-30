@@ -4,6 +4,7 @@ import stat
 
 import webstores.BestBuy as bestBuy
 from FileUtil import FileUtil
+from webstores import newegg, amazon
 
 
 async def main():
@@ -25,6 +26,10 @@ async def main():
     for item in config["items"]:
         if item["store"] == "BestBuy":
             tasks.append(bestBuy.BestBuy(file_util, item["target_url"]).initialize())
+        if item["store"] == "Newegg":
+            tasks.append(newegg.NewEgg(file_util, item["target_url"]).initialize())
+        if item["store"] == "Amazon":
+            tasks.append(amazon.Amazon(file_util, item["target_url"]).initialize())
         # add future stores here
 
     # Run tasks concurrently
